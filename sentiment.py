@@ -27,11 +27,12 @@ def get_credentials():
 	  username=user,
 	  password=pw
 	)
+	return tone_analyzer
 
 # Calls Watson tone analyzer to retrieve sentiments for text
 # Returns json output from tone analyzer
 def get_sentiment(text):
-	get_credentials()
+	tone_analyzer = get_credentials()
 	tone = tone_analyzer.tone(text, sentences=False)
 	categories = tone["document_tone"].get('tone_categories')
 	return categories
