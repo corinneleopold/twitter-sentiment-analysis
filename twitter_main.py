@@ -2,6 +2,10 @@ import tweepy
 from tweepy import OAuthHandler
 import sys
 from sentiment import get_sentiment
+import json
+import numpy as np
+import matplotlib.pyplot as plt
+from collections import Counter
 
 class TwitterClass(object):
     def __init__(self):
@@ -13,9 +17,9 @@ class TwitterClass(object):
 
         # Authentication attempt
         try:
-        	self.auth = OAuthHandler(consumer_key, consumer_secret)
-        	self.auth.set_access_token(access_token, access_token_secret)
-        	self.api = tweepy.API(self.auth)	# Create api object
+            self.auth = OAuthHandler(consumer_key, consumer_secret)
+            self.auth.set_access_token(access_token, access_token_secret)
+            self.api = tweepy.API(self.auth)    # Create api object
         except:
             print("ERROR: Authentication Failed")
             sys.exit(1)
@@ -56,5 +60,28 @@ class TwitterClass(object):
         cleanTweet['emotional_range'] = categories[2]['tones'][4]['score']
         return cleanTweet
 
+    def build_plot(self, tweets):
+        # Display aggregate sentiments about query topic
+        c = Counter()
+        for dicts in tweets:
+            dicts.pop('text', None) # Remove text field
+            c.update(dicts)
+        tweets_dict = dict(c)
+        avg_sentiments = [t/len(tweets) for t in tweets_dict.values()]  # Calculate average sentiment
+        labels = tweets_dict.keys()
+        labels_pos = np.arange(len(labels))
+        plt.bar(labels_pos, avg_sentiments, align='center', alpha=0.5)
+        plt.xticks(labels_pos,labels)
+        plt.xticks(rotation=90)
+        plt.ylabel("Sentiment Level")
+        plt.show()
+
+    # Method for analysis beyond sentiment identification
+#    def do_stuff(self, tweets):
+#        tweets_json = [json.dumps(status._json) for status in tweets]   # Access tweepy status object via _json property
+#        tweets_json = [json.loads(tweet) for tweet in tweets_json]
+
+
 tc = TwitterClass()
-tc.get_tweets(query="sample")
+tweets = tc.get_tweets(query="sample")
+tc.build_plot(tweets)
