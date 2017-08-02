@@ -5,7 +5,7 @@ from sentiment import get_sentiment
 
 class TwitterClass(object):
     def __init__(self):
-        # Enter Twitter API key and token information here
+        # Twitter API key and token information
         consumer_key = 'XXX'
         consumer_secret = 'XXX'
         access_token = 'XXX'
@@ -26,13 +26,17 @@ class TwitterClass(object):
         allTweets = []
         try:
             tweets = self.api.search(q=query,lang='en',rpp=50,include_entities=True)  # Get tweets for query
-            for tweet in tweets:
-                cleanTweet = {}
-                cleanTweet['text'] = tweet.text
-                sent_categories = get_sentiment(tweet.text) # Retrieve sentiment categories
-                cleanTweet = parse_sentiments(cleanTweet, sent_categories)  # Update cleanTweet to contain sentiments
         except:
             print "Unable to retrieve tweets"
+            return
+
+        for tweet in tweets:
+            cleanTweet = {}
+            sent_categories = get_sentiment(tweet.text) # Retrieve sentiment categories
+            cleanTweet = self.parse_sentiments(cleanTweet, sent_categories)  # Store sentiments in cleanTweet
+            cleanTweet['text'] = tweet.text
+            allTweets.append(cleanTweet)
+        return allTweets
 
     # Parses Watson Tone Analyzer results
     # Returns dictionary with entries in the format [sentiment : score]
@@ -52,3 +56,5 @@ class TwitterClass(object):
         cleanTweet['emotional_range'] = categories[2]['tones'][4]['score']
         return cleanTweet
 
+tc = TwitterClass()
+tc.get_tweets(query="sample")
